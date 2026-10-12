@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anna Cafeteria</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Login Screen -->
+        <div id="login-screen" class="card">
+            <h2>☕ Anna Cafeteria Login</h2>
+            <p>Enter the office passcode to view today's snacks</p>
+            <input type="password" id="passcode-input" placeholder="Enter Passcode...">
+            <button onclick="checkLogin()">Enter App</button>
+            <p id="login-error" class="error"></p>
+        </div>
+
+        <!-- User/Client Screen -->
+        <div id="user-screen" class="hidden">
+            <header>
+                <h2>👋 Office Snacks Menu</h2>
+                <button class="btn-secondary" onclick="logout()">Logout</button>
+            </header>
+            <div id="menu-container"></div>
+            
+            <hr>
+            <h3>⏳ Your Orders Today</h3>
+            <div id="user-orders"></div>
+        </div>
+
+        <!-- Admin/Kitchen Screen -->
+        <div id="admin-screen" class="hidden">
+            <header>
+                <h2>👨‍🍳 Kitchen Dashboard</h2>
+                <button class="btn-secondary" onclick="logout()">Logout</button>
+            </header>
+            <h3>📥 Active Incoming Orders</h3>
+            <div id="admin-orders"></div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK Imports (Web Browser Compatible) -->
+    <script type="module" src="app.js"></script>
+</body>
+</html>

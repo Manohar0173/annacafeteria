@@ -1,0 +1,35 @@
+:root {
+    --primary: #ff4757;
+    --secondary: #2f3542;
+    --bg: #f1f2f6;
+    --card-bg: #ffffff;
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: var(--bg);
+    margin: 0; padding: 15px; color: var(--secondary);
+}
+.card {
+    background: var(--card-bg);
+    padding: 20px; border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px;
+}
+input, button {
+    width: 100%; padding: 12px; margin-top: 10px;
+    border-radius: 8px; border: 1px solid #ced4da; box-sizing: border-box;
+}
+button {
+    background-color: var(--primary); color: white;
+    font-weight: bold; border: none; cursor: pointer;
+}
+button:hover { opacity: 0.9; }
+.btn-secondary { background-color: #747d8c; margin-top: 0; width: auto; }
+.hidden { display: none !important; }
+.menu-item { display: flex; justify-content: space-between; align-items: center; }
+.order-status {
+    padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 0.85em;
+}
+.status-Pending { background: #ffeaa7; color: #d63031; }
+.status-Confirmed { background: #81ecec; color: #0984e3; }
+.status-Ready { background: #55efc4; color: #00b894; }
+.error { color: var(--primary); font-size: 0.9em; }
