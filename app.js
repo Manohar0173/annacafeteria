@@ -1,6 +1,4 @@
-// ==========================================
-// SECTION 1: Firebase Configuration & Database Init
-// ==========================================
+// SECTION 1: Firebase Configuration & Master Menu
 const firebaseConfig = {
   apiKey: "AIzaSyAKaiPq5tS3b3HLWbwaJtuuTeS2L5-YKOg",
   authDomain: "://firebaseapp.com",
@@ -13,15 +11,12 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// Master inventory compiled from your weekly templates
 const masterSnacksList = [
-    // --- ALWAYS AVAILABLE BEVERAGES (Sugar Options) ---
     { id: 'lemon_tea', name: '🍋 Lemon Tea', price: '₹15', category: 'Beverages', requiresSugarOption: true },
     { id: 'black_coffee', name: '☕ Black Coffee', price: '₹15', category: 'Beverages', requiresSugarOption: true },
     { id: 'black_tea', name: '☕ Black Tea', price: '₹10', category: 'Beverages', requiresSugarOption: true },
     { id: 'tea', name: '☕ Tea', price: '₹10', category: 'Beverages', requiresSugarOption: true },
     { id: 'masala_chai', name: '☕ Masala Chai', price: '₹12', category: 'Beverages', requiresSugarOption: true },
-    // --- BREAKFAST ITEMS ---
     { id: 'idli_sambar', name: '🍲 Idli Sambar', price: '₹30', category: 'Breakfast' },
     { id: 'dal_vada', name: '🧆 Dal Vada', price: '₹25', category: 'Breakfast' },
     { id: 'kanda_poha', name: '🥣 Kanda Poha', price: '₹20', category: 'Breakfast' },
@@ -35,7 +30,6 @@ const masterSnacksList = [
     { id: 'vada_usal_2pav', name: '🍲 Vada Usal 2 Pav', price: '₹45', category: 'Breakfast' },
     { id: 'kanchipuram_idli', name: '🍲 Kanchipuram Idli Sambar', price: '₹35', category: 'Breakfast' },
     { id: 'mini_masala_idli', name: '🍲 Mini Masala Idli', price: '₹30', category: 'Breakfast' },
-    // --- LUNCH ITEMS ---
     { id: 'chawli_masala', name: '🍛 Chawli Masala', price: '₹45', category: 'Lunch' },
     { id: 'baigan_bharta', name: '🍆 Baigan Bharta', price: '₹45', category: 'Lunch' },
     { id: 'dal_fry', name: '🍲 Dal Fry', price: '₹30', category: 'Lunch' },
@@ -56,7 +50,6 @@ const masterSnacksList = [
     { id: 'soyabean_chilli', name: '🧆 Soyabean Chilli', price: '₹45', category: 'Lunch' },
     { id: 'mix_veg_dry', name: '🥦 Mix Veg Dry', price: '₹45', category: 'Lunch' },
     { id: 'sweet_jalebi', name: '🍨 Sweet Jalebi', price: '₹30', category: 'Lunch' },
-    // --- EVENING SNACKS ---
     { id: 'samosa', name: '🌯 Samosa', price: '₹15', category: 'Snacks' },
     { id: 'bun_maska', name: '🍞 Bun Maska', price: '₹20', category: 'Snacks' },
     { id: 'veg_toast_sandwich_maker', name: '🥪 Veg Toast Sandwich Maker', price: '₹35', category: 'Snacks' },
@@ -71,9 +64,7 @@ const masterSnacksList = [
 let currentRole = null;
 let currentUserName = "";
 
-// ==========================================
-// SECTION 2: App Navigation & Employee Flow
-// ==========================================
+// SECTION 2: Navigation & Employee Logic
 window.checkLogin = function() {
     const code = document.getElementById('passcode-input').value;
     const errorEl = document.getElementById('login-error');
@@ -157,10 +148,10 @@ function listenToUserOrders() {
     db.collection("orders").onSnapshot((snapshot) => {
         const container = document.getElementById('user-orders');
         container.innerHTML = "";
-        let docs = []; // ◄ Fixed: Added missing brackets [] to fix text formatting syntax crash
-        snapshot.forEach(doc => docs.push(doc.data()));
-        docs.sort((a,b) => b.timestamp - a.timestamp);
-        docs.forEach(order => {
+        let userDocs = []; // ◄ Cleaned up formatting bug safely
+        snapshot.forEach(doc => userDocs.push(doc.data()));
+        userDocs.sort((a,b) => b.timestamp - a.timestamp);
+        userDocs.forEach(order => {
             if(order.user === currentUserName) {
                 const div = document.createElement('div');
                 div.className = 'card';
@@ -174,9 +165,7 @@ function listenToUserOrders() {
     });
 }
 
-// ==========================================
-// SECTION 3: Kitchen Controls & Management
-// ==========================================
+// SECTION 3: Kitchen Controls
 function initializeMenuInFirebase() {
     masterSnacksList.forEach(snack => {
         const isBeverage = snack.category === 'Beverages';
@@ -222,10 +211,10 @@ function listenToOrdersKitchen() {
     db.collection("orders").onSnapshot((snapshot) => {
         const container = document.getElementById('admin-orders');
         container.innerHTML = "";
-        let activeOrders = []; // ◄ Fixed: Added missing brackets [] to prevent runtime crashes
-        snapshot.forEach(doc => activeOrders.push({ id: doc.id, ...doc.data() }));
-        activeOrders.sort((a,b) => b.timestamp - a.timestamp);
-        activeOrders.forEach(order => {
+        let kitchenDocs = []; // ◄ Cleaned up formatting bug safely here too
+        snapshot.forEach(doc => kitchenDocs.push({ id: doc.id, ...doc.data() }));
+        kitchenDocs.sort((a,b) => b.timestamp - a.timestamp);
+        kitchenDocs.forEach(order => {
             if(order.status !== "Ready") {
                 const div = document.createElement('div');
                 div.className = 'card';
