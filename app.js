@@ -1,4 +1,6 @@
-// SECTION 1: Firebase Setup & Master Inventory List
+// ==========================================
+// SECTION 1: Firebase Configuration & Database Init
+// ==========================================
 const firebaseConfig = {
   apiKey: "AIzaSyAKaiPq5tS3b3HLWbwaJtuuTeS2L5-YKOg",
   authDomain: "://firebaseapp.com",
@@ -11,6 +13,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
+// Master inventory compiled from your weekly templates
 const masterSnacksList = [
     // --- ALWAYS AVAILABLE BEVERAGES (Sugar Options) ---
     { id: 'lemon_tea', name: '🍋 Lemon Tea', price: '₹15', category: 'Beverages', requiresSugarOption: true },
@@ -68,8 +71,10 @@ const masterSnacksList = [
 let currentRole = null;
 let currentUserName = "";
 
-// SECTION 2: App Navigation & Employee Ordering Flow
-function checkLogin() {
+// ==========================================
+// SECTION 2: App Navigation & Employee Flow
+// ==========================================
+window.checkLogin = function() {
     const code = document.getElementById('passcode-input').value;
     const errorEl = document.getElementById('login-error');
     
@@ -90,7 +95,7 @@ function checkLogin() {
     }
 }
 
-function logout() { location.reload(); }
+window.logout = function() { location.reload(); }
 
 function showScreen(screenId) {
     document.getElementById('login-screen').classList.add('hidden');
@@ -169,7 +174,9 @@ function listenToUserOrders() {
     });
 }
 
-// SECTION 3: Kitchen Controls & Admin Management Panel
+// ==========================================
+// SECTION 3: Kitchen Controls & Dashboard Management
+// ==========================================
 function initializeMenuInFirebase() {
     masterSnacksList.forEach(snack => {
         const isBeverage = snack.category === 'Beverages';
@@ -207,7 +214,7 @@ function listenToMenuChef() {
     });
 }
 
-function toggleAvailability(itemId, currentStatus) {
+window.toggleAvailability = function(itemId, currentStatus) {
     db.collection("menu").doc(itemId).update({ available: !currentStatus });
 }
 
@@ -233,7 +240,7 @@ function listenToOrdersKitchen() {
     });
 }
 
-function updateStatus(orderId, newStatus) {
+window.updateStatus = function(orderId, newStatus) {
     let timeEstimate = "";
     if(newStatus === 'Confirmed') {
         timeEstimate = prompt("Enter preparation time (e.g., 10 mins):") || "10 mins";
@@ -241,7 +248,6 @@ function updateStatus(orderId, newStatus) {
     db.collection("orders").doc(orderId).update({ status: newStatus, timeEstimate: timeEstimate });
 }
 
-// Global scope attachment for the index.html clear button
 window.clearAllOrders = function() {
     if(confirm("Are you sure you want to completely clear out the order history board?")) {
         db.collection("orders").get().then((snapshot) => {
