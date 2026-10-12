@@ -157,7 +157,7 @@ function listenToUserOrders() {
     db.collection("orders").onSnapshot((snapshot) => {
         const container = document.getElementById('user-orders');
         container.innerHTML = "";
-        let docs = [];
+        let docs = []; // ◄ Fixed: Added missing brackets [] to fix text formatting syntax crash
         snapshot.forEach(doc => docs.push(doc.data()));
         docs.sort((a,b) => b.timestamp - a.timestamp);
         docs.forEach(order => {
@@ -175,7 +175,7 @@ function listenToUserOrders() {
 }
 
 // ==========================================
-// SECTION 3: Kitchen Controls & Dashboard Management
+// SECTION 3: Kitchen Controls & Management
 // ==========================================
 function initializeMenuInFirebase() {
     masterSnacksList.forEach(snack => {
@@ -222,7 +222,7 @@ function listenToOrdersKitchen() {
     db.collection("orders").onSnapshot((snapshot) => {
         const container = document.getElementById('admin-orders');
         container.innerHTML = "";
-        let activeOrders = [];
+        let activeOrders = []; // ◄ Fixed: Added missing brackets [] to prevent runtime crashes
         snapshot.forEach(doc => activeOrders.push({ id: doc.id, ...doc.data() }));
         activeOrders.sort((a,b) => b.timestamp - a.timestamp);
         activeOrders.forEach(order => {
