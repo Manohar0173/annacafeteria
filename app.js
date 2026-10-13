@@ -18,7 +18,7 @@ let currentRole = null;
 window.currentUserName = "";
 
 // ==========================================
-// 3. SECURE PASSCODE ROUTING LOGIC
+// 2. SECURE PASSCODE ROUTING LOGIC
 // ==========================================
 window.checkLogin = function() {
     const userTyped = document.getElementById("passcode-input").value.trim();
@@ -28,7 +28,10 @@ window.checkLogin = function() {
     if (userTyped === "AnnaOffice123") {
         document.getElementById("login-screen").style.display = "none";
         document.getElementById("user-screen").style.display = "block";
-        window.currentUserName = prompt("Please enter your name:") || "Employee";
+       window.currentUserName = prompt("Please enter your name:") || "Employee";
+        
+        // Triggers the real-time live menu feed for your employees
+        listenToMenuUser();
     } 
     else if (userTyped === "admin") {
         document.getElementById("login-screen").style.display = "none";
@@ -95,9 +98,72 @@ function listenToMenuChef() {
     });
 }
 
-// Switches item availability status instantly inside Firebase cloud data folders
-window.changeMenuStatus = function(itemId, currentStatus) {
-    db.collection("menu").doc(itemId).update({ available: !currentStatus });
+// ==========================================
+// 4. REAL-TIME EMPLOYEE LIVE MENU FEED
+// ==========================================
+function listenToMenuUser() {
+    // Looks into cloud data and ONLY pulls down items where available == true
+    db.collection("menu").where("available", "==", true).onSnapshot((snapshot) => {
+        const container = document.getElementById('menu-container');
+        if (!container) return;
+        
+        container.innerHTML = "<h3>Today's Available Menu</h3>";
+        
+        if (snapshot.empty) {
+            container.innerHTML += "<p style='color:#747d8c;'>The kitchen hasn't opened ordering for any items yet.</p>";
+            return;
+        }
+
+        snapshot.forEach(doc => {
+            const item = doc.data();
+            const div = document.createElement('div');
+            div.style.display = "flex";
+            div.style.justifyContent = "space-between";
+            div.style.alignItems = "center";
+            div.style.padding = "12px";
+            div.style.backgroundColor = "white";
+            div.style.borderRadius = "8px";
+            div.style.marginBottom = "8px";
+            div.style.boxShadow = "0 2px 4px rgba(0,0,0,0.02)";
+
+            // Package data to send directly over to our click processing logic
+            const clickParam = JSON.stringify({ name: item.name, needsSugar: item.requiresSugarOption || false }).replace(/"/g, '&quot;');
+
+            div.innerHTML = `
+                <div>
+                    <strong>${item.name}</strong> - <span style="color:#ff4757; font-weight:bold;">${item.price}</span>
+                    <br><small style="color:#747d8c;">Category: ${item.category}</small>
+                </div>
+                <button style="width:auto; margin:0; padding:8px 16px; font-size:0.9em;" onclick="processUserSelection('${clickParam}')">Order Now</button>
+            `;
+            container.appendChild(div);
+        });
+    });
+}
+
+// Processing item quantities and custom sugar selections
+window.processUserSelection = function(itemJsonString) {
+    const itemData = JSON.parse(itemJsonString);
+    
+    if (itemData.needsSugar) {
+        const qtyInput = prompt(`How many total cups of ${itemData.name} do you want to order for your group?`, "1");
+        const totalQty = parseInt(qtyInput) || 1;
+        
+        if (totalQty > 1) {
+            const sugarQtyInput = prompt(`Out of these ${totalQty} cups, how many should be WITH SUGAR?`, totalQty.toString());
+            const withSugar = parseInt(sugarQtyInput) || 0;
+            const withoutSugar = Math.max(0, totalQty - withSugar);
+            
+            alert(`Group Order Compiled:\n${itemData.name} x${totalQty}\n🟢 ${withSugar} With Sugar\n⚪ ${withoutSugar} Without Sugar`);
+        } else {
+            const sugarChoice = confirm(`Do you want sugar in your ${itemData.name}?\n\n[OK] = With Sugar\n[Cancel] = Without Sugar`);
+            alert(`Order Selected: ${itemData.name} ${sugarChoice ? '(With Sugar)' : '(Without Sugar)'}`);
+        }
+    } else {
+        const qtyInput = prompt(`How many portions of ${itemData.name} would you like to order?`, "1");
+        const totalQty = parseInt(qtyInput) || 1;
+        alert(`Order Selected: ${itemData.name} ${totalQty > 1 ? `x\${totalQty}` : ''}`);
+    }
 };
 
 window.logout = function() {
