@@ -1,59 +1,237 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anna Cafeteria</title>
-    <link rel="stylesheet" href="styles.css">
-    <!-- Browser-compatible Firebase Scripts -->
-    <script src="https://gstatic.com"></script>
-    <script src="https://gstatic.com"></script>
-</head>
-<body>
-    <div id="app">
-        <!-- Login Screen -->
-        <div id="login-screen" class="card">
-            <h2>☕ Anna Cafeteria Login</h2>
-            <p>Enter the office passcode to view today's snacks</p>
-            <input type="password" id="passcode-input" placeholder="Enter Passcode...">
-            <button onclick="checkLogin()">Enter App</button>
-            <p id="login-error" class="error"></p>
-        </div>
+// SECTION 3: Kitchen Controls
+function initializeMenuInFirebase() {
+    masterSnacksList.forEach(snack => {
+        const isBeverage = snack.category === 'Beverages';
+        db.collection("menu").doc(snack.id).set({
+            name: snack.name, price: snack.price, category: snack.category,
+            requiresSugarOption: snack.requiresSugarOption || false, available: isBeverage ? true : false 
+        }, { merge: true });
+    });
+}
 
-        <!-- User/Client Screen -->
-        <div id="user-screen" class="hidden">
-            <header style="display: flex; justify-content: space-between; align-items: center;">
-                <h2>👋 Office Snacks Menu</h2>
-                <button class="btn-secondary" onclick="logout()">Logout</button>
-            </header>
-            <div id="menu-container"></div>
-            <hr>
-            <h3>⏳ Your Orders Today</h3>
-            <div id="user-orders"></div>
-        </div>
+function listenToMenuChef() {
+    db.collection("menu").onSnapshot((snapshot) => {
+        const container = document.getElementById('chef-menu-toggle-container');
+        container.innerHTML = "";
+        const categories = ['Beverages', 'Snacks', 'Breakfast', 'Lunch'];
+        categories.forEach(cat => {
+            const catHeading = document.createElement('h4');
+            catHeading.style.margin = "20px 0 8px 0"; catHeading.style.color = "#ff4757";
+            catHeading.innerText = `● ${cat.toUpperCase()}`;
+            container.appendChild(catHeading);
+            snapshot.forEach(doc => {
+                const item = doc.data();
+                if(item.category === cat) {
+                    const itemId = doc.id;
+                    const div = document.createElement('div');
+                    div.className = 'menu-item';
+                    const controlEl = (cat === 'Beverages') 
+                        ? `<span style="color: #2ed573; font-weight: bold; font-size: 0.9em;">✔️ Always On</span>`
+                        : `<button class="toggle-btn ${item.available ? 'active-menu' : 'inactive-menu'}" onclick="toggleAvailability('${itemId}', ${item.available})">${item.available ? '🟢 Available' : '🔴 Hidden'}</button>`;
+                    div.innerHTML = `<div><strong>${item.name}</strong> (${item.price})</div>${controlEl}`;
+                    container.appendChild(div);
+                }
+            });
+        });
+    });
+}
 
-        <!-- Admin/Kitchen Screen -->
-        <div id="admin-screen" class="hidden">
-            <header style="display: flex; justify-content: space-between; align-items: center;">
-                <h2>👨‍🍳 Kitchen Dashboard</h2>
-                <button class="btn-secondary" onclick="logout()">Logout</button>
-            </header>
-            
-            <div class="card">
-                <h3>📢 Today's Menu Control</h3>
-                <p>Toggle items to show/hide them on the employee menu:</p>
-                <div id="chef-menu-toggle-container"></div>
-            </div>
+window.toggleAvailability = function(itemId, currentStatus) {
+    db.collection("menu").doc(itemId).update({ available: !currentStatus });
+}
 
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h3>📥 Active Incoming Orders</h3>
-                <button class="btn-danger" onclick="clearAllOrders()">Clear Order History</button>
-            </div>
-            <div id="admin-orders"></div>
-        </div>
-    </div>
+function listenToOrdersKitchen() {
+    db.collection("orders").onSnapshot((snapshot) => {
+        const container = document.getElementById('admin-orders');
+        container.innerHTML = "";
+        let kitchenDocs = []; // ◄ Cleaned up formatting bug safely here too
+        snapshot.forEach(doc => kitchenDocs.push({ id: doc.id, ...doc.data() }));
+        kitchenDocs.sort((a,b) => b.timestamp - a.timestamp);
+        kitchenDocs.forEach(order => {
+            if(order.status !== "Ready") {
+                const div = document.createElement('div');
+                div.className = 'card';
+                div.innerHTML = `
+                    <p><strong>${order.user}</strong> ordered <strong style="color:#ff4757; font-size:1.1em;">${order.item}</strong></p>
+                    <button onclick="updateStatus('${order.id}', 'Confirmed')">Confirm</button>
+                    <button class="btn-secondary" style="margin-top:5px;" onclick="updateStatus('${order.id}', 'Ready')">Mark Ready</button>
+                `;
+                container.appendChild(div);
+            }
+        });
+    });
+}
 
-    <!-- Explicit scope bindings for GitHub Pages deployment -->
-    <script src="app.js"></script>
-</body>
-</html>
+window.updateStatus = function(orderId, newStatus) {
+    let timeEstimate = "";
+    if(newStatus === 'Confirmed') {
+        timeEstimate = prompt("Enter preparation time (e.g., 10 mins):") || "10 mins";
+    }
+    db.collection("orders").doc(orderId).update({ status: newStatus, timeEstimate: timeEstimate });
+}
+
+window.clearAllOrders = function() {
+    if(confirm("Are you sure you want to completely clear out the order history board?")) {
+        db.collection("orders").get().then((snapshot) => {
+            snapshot.forEach((doc) => doc.ref.delete());
+        });
+    }
+}
+// SECTION 3: Kitchen Controls
+function initializeMenuInFirebase() {
+    masterSnacksList.forEach(snack => {
+        const isBeverage = snack.category === 'Beverages';
+        db.collection("menu").doc(snack.id).set({
+            name: snack.name, price: snack.price, category: snack.category,
+            requiresSugarOption: snack.requiresSugarOption || false, available: isBeverage ? true : false 
+        }, { merge: true });
+    });
+}
+
+function listenToMenuChef() {
+    db.collection("menu").onSnapshot((snapshot) => {
+        const container = document.getElementById('chef-menu-toggle-container');
+        container.innerHTML = "";
+        const categories = ['Beverages', 'Snacks', 'Breakfast', 'Lunch'];
+        categories.forEach(cat => {
+            const catHeading = document.createElement('h4');
+            catHeading.style.margin = "20px 0 8px 0"; catHeading.style.color = "#ff4757";
+            catHeading.innerText = `● ${cat.toUpperCase()}`;
+            container.appendChild(catHeading);
+            snapshot.forEach(doc => {
+                const item = doc.data();
+                if(item.category === cat) {
+                    const itemId = doc.id;
+                    const div = document.createElement('div');
+                    div.className = 'menu-item';
+                    const controlEl = (cat === 'Beverages') 
+                        ? `<span style="color: #2ed573; font-weight: bold; font-size: 0.9em;">✔️ Always On</span>`
+                        : `<button class="toggle-btn ${item.available ? 'active-menu' : 'inactive-menu'}" onclick="toggleAvailability('${itemId}', ${item.available})">${item.available ? '🟢 Available' : '🔴 Hidden'}</button>`;
+                    div.innerHTML = `<div><strong>${item.name}</strong> (${item.price})</div>${controlEl}`;
+                    container.appendChild(div);
+                }
+            });
+        });
+    });
+}
+
+window.toggleAvailability = function(itemId, currentStatus) {
+    db.collection("menu").doc(itemId).update({ available: !currentStatus });
+}
+
+function listenToOrdersKitchen() {
+    db.collection("orders").onSnapshot((snapshot) => {
+        const container = document.getElementById('admin-orders');
+        container.innerHTML = "";
+        let kitchenDocs = []; // ◄ Cleaned up formatting bug safely here too
+        snapshot.forEach(doc => kitchenDocs.push({ id: doc.id, ...doc.data() }));
+        kitchenDocs.sort((a,b) => b.timestamp - a.timestamp);
+        kitchenDocs.forEach(order => {
+            if(order.status !== "Ready") {
+                const div = document.createElement('div');
+                div.className = 'card';
+                div.innerHTML = `
+                    <p><strong>${order.user}</strong> ordered <strong style="color:#ff4757; font-size:1.1em;">${order.item}</strong></p>
+                    <button onclick="updateStatus('${order.id}', 'Confirmed')">Confirm</button>
+                    <button class="btn-secondary" style="margin-top:5px;" onclick="updateStatus('${order.id}', 'Ready')">Mark Ready</button>
+                `;
+                container.appendChild(div);
+            }
+        });
+    });
+}
+
+window.updateStatus = function(orderId, newStatus) {
+    let timeEstimate = "";
+    if(newStatus === 'Confirmed') {
+        timeEstimate = prompt("Enter preparation time (e.g., 10 mins):") || "10 mins";
+    }
+    db.collection("orders").doc(orderId).update({ status: newStatus, timeEstimate: timeEstimate });
+}
+
+window.clearAllOrders = function() {
+    if(confirm("Are you sure you want to completely clear out the order history board?")) {
+        db.collection("orders").get().then((snapshot) => {
+            snapshot.forEach((doc) => doc.ref.delete());
+        });
+    }
+}
+// SECTION 3: Kitchen Controls
+function initializeMenuInFirebase() {
+    masterSnacksList.forEach(snack => {
+        const isBeverage = snack.category === 'Beverages';
+        db.collection("menu").doc(snack.id).set({
+            name: snack.name, price: snack.price, category: snack.category,
+            requiresSugarOption: snack.requiresSugarOption || false, available: isBeverage ? true : false 
+        }, { merge: true });
+    });
+}
+
+function listenToMenuChef() {
+    db.collection("menu").onSnapshot((snapshot) => {
+        const container = document.getElementById('chef-menu-toggle-container');
+        container.innerHTML = "";
+        const categories = ['Beverages', 'Snacks', 'Breakfast', 'Lunch'];
+        categories.forEach(cat => {
+            const catHeading = document.createElement('h4');
+            catHeading.style.margin = "20px 0 8px 0"; catHeading.style.color = "#ff4757";
+            catHeading.innerText = `● ${cat.toUpperCase()}`;
+            container.appendChild(catHeading);
+            snapshot.forEach(doc => {
+                const item = doc.data();
+                if(item.category === cat) {
+                    const itemId = doc.id;
+                    const div = document.createElement('div');
+                    div.className = 'menu-item';
+                    const controlEl = (cat === 'Beverages') 
+                        ? `<span style="color: #2ed573; font-weight: bold; font-size: 0.9em;">✔️ Always On</span>`
+                        : `<button class="toggle-btn ${item.available ? 'active-menu' : 'inactive-menu'}" onclick="toggleAvailability('${itemId}', ${item.available})">${item.available ? '🟢 Available' : '🔴 Hidden'}</button>`;
+                    div.innerHTML = `<div><strong>${item.name}</strong> (${item.price})</div>${controlEl}`;
+                    container.appendChild(div);
+                }
+            });
+        });
+    });
+}
+
+window.toggleAvailability = function(itemId, currentStatus) {
+    db.collection("menu").doc(itemId).update({ available: !currentStatus });
+}
+
+function listenToOrdersKitchen() {
+    db.collection("orders").onSnapshot((snapshot) => {
+        const container = document.getElementById('admin-orders');
+        container.innerHTML = "";
+        let kitchenDocs = []; // ◄ Cleaned up formatting bug safely here too
+        snapshot.forEach(doc => kitchenDocs.push({ id: doc.id, ...doc.data() }));
+        kitchenDocs.sort((a,b) => b.timestamp - a.timestamp);
+        kitchenDocs.forEach(order => {
+            if(order.status !== "Ready") {
+                const div = document.createElement('div');
+                div.className = 'card';
+                div.innerHTML = `
+                    <p><strong>${order.user}</strong> ordered <strong style="color:#ff4757; font-size:1.1em;">${order.item}</strong></p>
+                    <button onclick="updateStatus('${order.id}', 'Confirmed')">Confirm</button>
+                    <button class="btn-secondary" style="margin-top:5px;" onclick="updateStatus('${order.id}', 'Ready')">Mark Ready</button>
+                `;
+                container.appendChild(div);
+            }
+        });
+    });
+}
+
+window.updateStatus = function(orderId, newStatus) {
+    let timeEstimate = "";
+    if(newStatus === 'Confirmed') {
+        timeEstimate = prompt("Enter preparation time (e.g., 10 mins):") || "10 mins";
+    }
+    db.collection("orders").doc(orderId).update({ status: newStatus, timeEstimate: timeEstimate });
+}
+
+window.clearAllOrders = function() {
+    if(confirm("Are you sure you want to completely clear out the order history board?")) {
+        db.collection("orders").get().then((snapshot) => {
+            snapshot.forEach((doc) => doc.ref.delete());
+        });
+    }
+}
