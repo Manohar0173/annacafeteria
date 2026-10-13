@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anna Cafeteria - Test</title>
+    <title>Anna Cafeteria - Step 2</title>
     <!-- Connect to our design file -->
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div id="app">
-        <!-- 1. THE LOGIN FORM SCREEN -->
+        <!-- 1. THE LOGIN SCREEN (Visible at startup) -->
         <div id="login-screen">
             <h2>☕ Anna Cafeteria Login</h2>
             <input type="password" id="passcode-input" placeholder="Enter Passcode...">
@@ -17,10 +17,17 @@
             <p id="login-error" style="color: red; font-weight: bold;"></p>
         </div>
 
-        <!-- 2. THE SUCCESS SCREEN (Hidden by default) -->
-        <div id="success-screen" style="display: none;">
-            <h2>🎉 Logged in successfully!</h2>
-            <p>Your login routing is working perfectly.</p>
+        <!-- 2. THE EMPLOYEE MENU ROOM (Hidden by default) -->
+        <div id="user-screen" style="display: none;">
+            <h2>👋 Office Snacks Menu</h2>
+            <p style="color: #747d8c;">(Soon, today's available snacks will load here!)</p>
+            <button onclick="logout()">Logout</button>
+        </div>
+
+        <!-- 3. THE KITCHEN DASHBOARD ROOM (Hidden by default) -->
+        <div id="admin-screen" style="display: none;">
+            <h2>👨‍🍳 Kitchen Dashboard Control</h2>
+            <p style="color: #ff4757; font-weight: bold;">(Soon, the chef's toggle switches will load here!)</p>
             <button onclick="logout()">Logout</button>
         </div>
     </div>
