@@ -1,19 +1,33 @@
-window.checkLogin = function() { // ◄ Changed this line to bind to global scope
-    // 1. Grab what the user typed in the input box
-    const userTyped = document.getElementById("passcode-input").value;
+window.checkLogin = function() {
+    // 1. Grab what the user typed in the passcode box
+    const userTyped = document.getElementById("passcode-input").value.trim();
+    const errorEl = document.getElementById("login-error");
     
-    // 2. Check if it matches our secret password
+    // Clear out any previous error messages
+    errorEl.innerText = "";
+
+    // 2. CHECK RULE 1: Did they type the Employee passcode?
     if (userTyped === "AnnaOffice123") {
-        // Hide the login screen and show the success screen!
+        // Hide Login and open the 👋 Employee Menu Room
         document.getElementById("login-screen").style.display = "none";
-        document.getElementById("success-screen").style.display = "block";
-    } else {
-        // Show an error message if it's wrong
-        document.getElementById("login-error").innerText = "Wrong passcode! Try again.";
+        document.getElementById("user-screen").style.display = "block";
+        
+        // Ask for their name to track their orders
+        window.currentUserName = prompt("Please enter your name:") || "Employee";
+    } 
+    // 3. CHECK RULE 2: Did they type the Kitchen passcode?
+    else if (userTyped === "admin") {
+        // Hide Login and open the 👨‍🍳 Kitchen Dashboard
+        document.getElementById("login-screen").style.display = "none";
+        document.getElementById("admin-screen").style.display = "block";
+    } 
+    // 4. CHECK RULE 3: Is it completely wrong?
+    else {
+        errorEl.innerText = "Wrong passcode! Try 'AnnaOffice123' or 'admin'.";
     }
 }
 
-window.logout = function() { // ◄ Changed this line too
-    // Reload the page to log back out safely
+window.logout = function() {
+    // Reload the webpage to clear out current sessions and return to Login screen cleanly
     window.location.reload();
 }
