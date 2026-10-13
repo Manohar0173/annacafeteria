@@ -3,7 +3,7 @@
 // ==========================================
 const firebaseConfig = {
   apiKey: "AIzaSyAKaiPq5tS3b3HLWbwaJtuuTeS2L5-YKOg",
-  authDomain: "://firebaseapp.com",
+  authDomain: "project-anna-92aef.firebaseapp.com",
   projectId: "project-anna-92aef",
   storageBucket: "project-anna-92aef.firebasestorage.app",
   messagingSenderId: "80365084788",
