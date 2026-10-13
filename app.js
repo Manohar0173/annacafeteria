@@ -36,11 +36,13 @@ window.checkLogin = function() {
         listenToMenuUser();
     } 
     else if (userTyped === "admin") {
+        currentRole = 'admin';
         document.getElementById("login-screen").style.display = "none";
         document.getElementById("admin-screen").style.display = "block";
         
         // Triggers the real-time layout card builder for the chef dashboard
         listenToMenuChef();
+        listenToOrdersKitchen(); // ◄ ADD THIS SINGLE EXPLICIT LINE HERE TO ACTIVATE THE KITCHEN FEED!
     } 
     else {
         errorEl.innerText = "Wrong passcode! Try 'AnnaOffice123' or 'admin'.";
@@ -267,6 +269,55 @@ window.submitFinalBasket = function() {
         userBasket = [];
         renderBasketUI();
     });
+};
+
+
+// ==========================================
+// 5. LIVE KITCHEN ORDER TICKETS ENGINE
+// ==========================================
+function listenToOrdersKitchen() {
+    // Listens to the cloud orders folder and updates the chef screen instantly when a worker checks out
+    db.collection("orders").onSnapshot((snapshot) => {
+        const container = document.getElementById('admin-orders');
+        if (!container) return;
+        container.innerHTML = ""; // Clear old cards to prevent duplicate loop loading
+        
+        let activeOrders = []; // Clean initialized empty array syntax
+        snapshot.forEach(doc => activeOrders.push({ id: doc.id, ...doc.data() }));
+        
+        // Sort orders so the newest incoming tickets flash at the top of the chef screen
+        activeOrders.sort((a, b) => b.timestamp - a.timestamp);
+        
+        activeOrders.forEach(order => {
+            // Only show orders that are actively being worked on (Hide them once they are fully "Ready")
+            if (order.status !== "Ready") {
+                const div = document.createElement('div');
+                div.style.padding = "12px"; 
+                div.style.background = "white"; 
+                div.style.borderRadius = "8px"; 
+                div.style.marginBottom = "8px";
+                div.style.boxShadow = "0 2px 4px rgba(0,0,0,0.02)";
+                
+                div.innerHTML = `
+                    <p style="margin:0 0 8px 0;"><strong>${order.user}</strong> ordered <strong style="color:#ff4757;">${order.item}</strong></p>
+                    <div style="display:flex; gap:8px;">
+                        <button style="width:auto; padding:6px 12px; margin:0; background:#0984e3;" onclick="modifyTicketStatus('${order.id}', 'Confirmed')">Confirm</button>
+                        <button style="width:auto; padding:6px 12px; margin:0; background:#2ed573;" onclick="modifyTicketStatus('${order.id}', 'Ready')">Mark Ready</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            }
+        });
+    });
+}
+
+// Global scope definition connecting the chef dashboard button clicks directly to Firebase
+window.modifyTicketStatus = function(ticketId, targetStatus) {
+    let eta = "";
+    if (targetStatus === 'Confirmed') {
+        eta = prompt("Enter preparation time estimate (e.g., 10 mins):") || "10 mins";
+    }
+    db.collection("orders").doc(ticketId).update({ status: targetStatus, timeEstimate: eta });
 };
 
 window.logout = function() {
