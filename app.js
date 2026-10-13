@@ -40,9 +40,28 @@ const masterSnacksList = [
     { id: 'kanchipuram_idli', name: '🍲 Kanchipuram Idli Sambar', price: '₹35', category: 'Breakfast' },
     { id: 'mini_masala_idli', name: '🍲 Mini Masala Idli', price: '₹30', category: 'Breakfast' },
 
-    // --- LUNCH THALI SYSTEM ---
-    { id: 'lunch_thali', name: "🍛 Today's Lunch Thali", price: '₹80', category: 'Lunch', description: 'Check with chef for today special contents description' },
-
+    // --- LUNCH THALI ITEMS ---
+    { id: 'chawli_masala', name: '🍛 Chawli Masala', price: '₹45', category: 'Lunch' },
+    { id: 'baigan_bharta', name: '🍆 Baigan Bharta', price: '₹45', category: 'Lunch' },
+    { id: 'dal_fry', name: '🍲 Dal Fry', price: '₹30', category: 'Lunch' },
+    { id: 'rice', name: '🍚 Rice', price: '₹20', category: 'Lunch' },
+    { id: 'chapaathi', name: '🫓 Chapaathi', price: '₹7', category: 'Lunch' },
+    { id: 'salad', name: '🥗 Salad', price: '₹15', category: 'Lunch' },
+    { id: 'papad', name: '🫓 Papad', price: '₹5', category: 'Lunch' },
+    { id: 'sweet_sev_kheer', name: '🍨 Sweet Sev Kheer', price: '₹30', category: 'Lunch' },
+    { id: 'dahi_bhendi_masala', name: '🍛 Dahi Bhendi Masala', price: '₹45', category: 'Lunch' },
+    { id: 'aloo_methi_dry', name: '🥔 Aloo Methi Dry', price: '₹40', category: 'Lunch' },
+    { id: 'sweet_sona_papadi', name: '🍨 Sweet Sona Papadi', price: '₹25', category: 'Lunch' },
+    { id: 'veg_kolapuri', name: '🌶️ Veg Kolapuri', price: '₹50', category: 'Lunch' },
+    { id: 'katol_dey', name: '🍛 Katol Dey', price: '₹45', category: 'Lunch' },
+    { id: 'sweet_gulab_jamun', name: '🍨 Sweet Gulab Jamun', price: '₹30', category: 'Lunch' },
+    { id: 'chole_masala', name: '🍛 Chole Masala', price: '₹50', category: 'Lunch' },
+    { id: 'doodi_channa_dry', name: '🥒 Doodi Channa Dry', price: '₹40', category: 'Lunch' },
+    { id: 'sweet_dahi', name: '🍨 Sweet Dahi', price: '₹20', category: 'Lunch' },
+    { id: 'soyabean_chilli', name: '🧆 Soyabean Chilli', price: '₹45', category: 'Lunch' },
+    { id: 'mix_veg_dry', name: '🥦 Mix Veg Dry', price: '₹45', category: 'Lunch' },
+    { id: 'sweet_jalebi', name: '🍨 Sweet Jalebi', price: '₹30', category: 'Lunch' },
+  
     // --- EVENING SNACKS ---
     { id: 'samosa', name: '🌯 Samosa', price: '₹15', category: 'Snacks' },
     { id: 'bun_maska', name: '🍞 Bun Maska', price: '₹20', category: 'Snacks' },
