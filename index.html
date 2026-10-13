@@ -9,12 +9,21 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <!-- Connect to our design file -->
     <link rel="stylesheet" href="styles.css">
+    <style>
+        .basket-section { background: #fff; padding: 15px; border-radius: 12px; margin-top: 20px; border: 2px dashed #ff4757; }
+        .basket-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed #eee; }
+        .qty-controls { display: flex; align-items: center; gap: 8px; }
+        .qty-btn { width: 32px; height: 32px; padding: 0; margin: 0; background: #ff4757; color: white; border-radius: 50%; font-size: 1.2em; cursor: pointer; border: none; }
+        .qty-btn.dec { background: #747d8c; }
+        .sugar-toggle-label { font-size: 0.85em; display: flex; align-items: center; gap: 4px; margin-top: 4px; color: #2f3542; cursor: pointer; }
+    </style>
 </head>
 <body>
     <div id="app">
         <!-- THE LOGIN SCREEN -->
         <div id="login-screen">
             <h2>☕ Anna Cafeteria Login</h2>
+            <p>Enter the office passcode First</p>
             <input type="password" id="passcode-input" placeholder="Enter Passcode...">
             <button onclick="checkLogin()">Enter App</button>
             <p id="login-error" style="color: red; font-weight: bold;"></p>
@@ -26,11 +35,21 @@
                 <h2>👋 Office Snacks Menu</h2>
                 <button onclick="logout()" style="width: auto; background-color: #747d8c; margin-top:0;">Logout</button>
             </div>
-            <!-- This container will automatically display active database snack cards -->
+            
+        <!-- Dynamic Front-Desk Selection Menu Feed -->
             <div id="menu-container"></div>
-            <hr>
-            <h3>⏳ Your Orders Today</h3>
-            <!-- This container will automatically update with live order ticket statuses -->
+            
+            <!-- 🛒 THE SHOPPING BASKET SECTION -->
+            <div class="basket-section">
+                <h3>🛒 Your Selection Basket</h3>
+                <div id="basket-items-container">
+                    <p style="color: #747d8c; font-style: italic;">Your basket is currently empty. Click "Add to Basket" above!</p>
+                </div>
+                <button id="submit-order-btn" onclick="submitFinalBasket()" style="margin-top: 15px; display: none; background-color: #2ed573;">Place Final Order Ticket</button>
+            </div>
+
+            <hr style="margin: 25px 0;">
+            <h3>⏳ Your Sent Orders Today</h3>
             <div id="user-orders"></div>
         </div>
 
