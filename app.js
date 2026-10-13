@@ -166,6 +166,10 @@ window.processUserSelection = function(itemJsonString) {
     }
 };
 
+window.changeMenuStatus = function(itemId, currentStatus) {
+    db.collection("menu").doc(itemId).update({ available: !currentStatus });
+};
+
 window.logout = function() {
     window.location.reload();
 }
