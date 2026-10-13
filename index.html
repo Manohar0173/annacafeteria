@@ -3,13 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anna Cafeteria - Step 2</title>
+    <title>Anna Cafeteria - Step 4</title>
+    <!-- 1. CRUCIAL: Connect to Google Firebase Framework libraries directly from the web -->
+    <script src="https://gstatic.com"></script>
+    <script src="https://gstatic.com"></script>
     <!-- Connect to our design file -->
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div id="app">
-        <!-- 1. THE LOGIN SCREEN (Visible at startup) -->
+        <!-- THE LOGIN SCREEN -->
         <div id="login-screen">
             <h2>☕ Anna Cafeteria Login</h2>
             <input type="password" id="passcode-input" placeholder="Enter Passcode...">
@@ -17,18 +20,38 @@
             <p id="login-error" style="color: red; font-weight: bold;"></p>
         </div>
 
-        <!-- 2. THE EMPLOYEE MENU ROOM (Hidden by default) -->
+        <!-- THE EMPLOYEE MENU ROOM (Upgraded) -->
         <div id="user-screen" style="display: none;">
-            <h2>👋 Office Snacks Menu</h2>
-            <p style="color: #747d8c;">(Soon, today's available snacks will load here!)</p>
-            <button onclick="logout()">Logout</button>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2>👋 Office Snacks Menu</h2>
+                <button onclick="logout()" style="width: auto; background-color: #747d8c; margin-top:0;">Logout</button>
+            </div>
+            <!-- This container will automatically display active database snack cards -->
+            <div id="menu-container"></div>
+            <hr>
+            <h3>⏳ Your Orders Today</h3>
+            <!-- This container will automatically update with live order ticket statuses -->
+            <div id="user-orders"></div>
         </div>
 
-        <!-- 3. THE KITCHEN DASHBOARD ROOM (Hidden by default) -->
+        <!-- THE KITCHEN DASHBOARD ROOM (Upgraded) -->
         <div id="admin-screen" style="display: none;">
-            <h2>👨‍🍳 Kitchen Dashboard Control</h2>
-            <p style="color: #ff4757; font-weight: bold;">(Soon, the chef's toggle switches will load here!)</p>
-            <button onclick="logout()">Logout</button>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2>👨‍🍳 Kitchen Dashboard Control</h2>
+                <button onclick="logout()" style="width: auto; background-color: #747d8c; margin-top:0;">Logout</button>
+            </div>
+            <div class="card" style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                <h3>📢 Today's Menu Control</h3>
+                <p>Toggle items to show/hide them on the employee menu:</p>
+                <!-- This container will hold the chef's active item toggle switches -->
+                <div id="chef-menu-toggle-container"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3>📥 Active Incoming Orders</h3>
+                <button onclick="clearAllOrders()" style="width: auto; background-color: #ff4757; margin-top:0; font-size: 0.8em; padding: 6px 12px;">Clear Order History</button>
+            </div>
+            <!-- This container will show the chef real-time incoming orders -->
+            <div id="admin-orders"></div>
         </div>
     </div>
 
