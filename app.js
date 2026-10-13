@@ -34,30 +34,71 @@ window.checkLogin = function() {
         document.getElementById("login-screen").style.display = "none";
         document.getElementById("admin-screen").style.display = "block";
         
-        // Pushes all your inventory choices up into the cloud database the moment admin logs in
-        initializeMenuInFirebase();
+        // Triggers the real-time layout card builder for the chef dashboard
+        listenToMenuChef();
     } 
     else {
         errorEl.innerText = "Wrong passcode! Try 'AnnaOffice123' or 'admin'.";
     }
 }
 
-// Push our items up into the cloud database structure safely
-function initializeMenuInFirebase() {
-    masterSnacksList.forEach(snack => {
-        const isBeverage = snack.category === 'Beverages';
-        db.collection("menu").doc(snack.id).set({
-            name: snack.name,
-            price: snack.price,
-            category: snack.category,
-            description: snack.description || "",
-            requiresSugarOption: snack.requiresSugar || false,
-            available: isBeverage ? true : false // Beverages turn on automatically, items stay hidden
-        }, { merge: true }).then(() => {
-            console.log("Successfully stored item in cloud database: " + snack.id);
+// ==========================================
+// 3. REAL-TIME KITCHEN MENU TOGGLE INTERFACE
+// ==========================================
+function listenToMenuChef() {
+    // Dynamically pulls items straight out of the cloud—no heavy local lists needed!
+    db.collection("menu").onSnapshot((snapshot) => {
+        const container = document.getElementById('chef-menu-toggle-container');
+        if (!container) return;
+        
+        container.innerHTML = ""; // Clear old cards to prevent duplicate loading
+        const categories = ['Beverages', 'Breakfast', 'Lunch', 'Snacks'];
+
+        categories.forEach(cat => {
+            const catHeading = document.createElement('h4');
+            catHeading.style.margin = "20px 0 8px 0";
+            catHeading.style.color = "#ff4757";
+            catHeading.innerText = `● ${cat.toUpperCase()}`;
+            container.appendChild(catHeading);
+
+            snapshot.forEach(doc => {
+                const item = doc.data();
+                if (item.category === cat) {
+                    const itemId = doc.id;
+                    const div = document.createElement('div');
+                    
+                    div.style.display = "flex";
+                    div.style.justifyContent = "space-between";
+                    div.style.alignItems = "center";
+                    div.style.padding = "10px 0";
+                    div.style.borderBottom = "1px solid #eee";
+
+                    let controlElement = "";
+                    if (cat === 'Beverages') {
+                        controlElement = `<span style="color: #2ed573; font-weight: bold; font-size: 0.9em;">✔️ Always On</span>`;
+                    } else {
+                        controlElement = `
+                            <button 
+                                style="width: auto; margin: 0; padding: 6px 12px; font-size: 0.85em; border: none; border-radius: 4px; color: white; font-weight: bold; cursor: pointer; background-color: ${item.available ? '#2ed573' : '#747d8c'}" 
+                                onclick="changeMenuStatus('${itemId}', ${item.available})"
+                            >
+                                ${item.available ? '🟢 Available' : '🔴 Hidden'}
+                            </button>
+                        `;
+                    }
+
+                    div.innerHTML = `<div><strong>${item.name}</strong> (${item.price})</div>${controlElement}`;
+                    container.appendChild(div);
+                }
+            });
         });
     });
 }
+
+// Switches item availability status instantly inside Firebase cloud data folders
+window.changeMenuStatus = function(itemId, currentStatus) {
+    db.collection("menu").doc(itemId).update({ available: !currentStatus });
+};
 
 window.logout = function() {
     window.location.reload();
