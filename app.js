@@ -15,6 +15,8 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 let currentRole = null;
+let userBasket = [];
+
 window.currentUserName = "";
 
 // ==========================================
@@ -102,11 +104,9 @@ function listenToMenuChef() {
 // 4. REAL-TIME EMPLOYEE LIVE MENU FEED
 // ==========================================
 function listenToMenuUser() {
-    // Looks into cloud data and ONLY pulls down items where available == true
     db.collection("menu").where("available", "==", true).onSnapshot((snapshot) => {
         const container = document.getElementById('menu-container');
         if (!container) return;
-        
         container.innerHTML = "<h3>Today's Available Menu</h3>";
         
         if (snapshot.empty) {
@@ -117,29 +117,26 @@ function listenToMenuUser() {
         snapshot.forEach(doc => {
             const item = doc.data();
             const div = document.createElement('div');
-            div.style.display = "flex";
-            div.style.justifyContent = "space-between";
-            div.style.alignItems = "center";
-            div.style.padding = "12px";
-            div.style.backgroundColor = "white";
-            div.style.borderRadius = "8px";
-            div.style.marginBottom = "8px";
-            div.style.boxShadow = "0 2px 4px rgba(0,0,0,0.02)";
+            div.style.display = "flex"; div.style.justifyContent = "space-between";
+            div.style.alignItems = "center"; div.style.padding = "12px";
+            div.style.backgroundColor = "white"; div.style.borderRadius = "8px";
+            div.style.marginBottom = "8px"; div.style.boxShadow = "0 2px 4px rgba(0,0,0,0.02)";
 
-            // Package data to send directly over to our click processing logic
-            const clickParam = JSON.stringify({ name: item.name, needsSugar: item.requiresSugarOption || false }).replace(/"/g, '&quot;');
+            // Packages data payload safely into a text string
+            const payload = JSON.stringify({ id: doc.id, name: item.name, price: item.price, sugar: item.requiresSugarOption || false }).replace(/"/g, '&quot;');
 
             div.innerHTML = `
                 <div>
                     <strong>${item.name}</strong> - <span style="color:#ff4757; font-weight:bold;">${item.price}</span>
                     <br><small style="color:#747d8c;">Category: ${item.category}</small>
                 </div>
-                <button style="width:auto; margin:0; padding:8px 16px; font-size:0.9em;" onclick="processUserSelection('${clickParam}')">Order Now</button>
+                <button style="width:auto; margin:0; padding:8px 16px; font-size:0.9em;" onclick="addItemToBasket('${payload}')">Add to Basket</button>
             `;
             container.appendChild(div);
         });
     });
 }
+
 
 // Processing item quantities and custom sugar selections
 window.processUserSelection = function(itemJsonString) {
@@ -168,6 +165,108 @@ window.processUserSelection = function(itemJsonString) {
 
 window.changeMenuStatus = function(itemId, currentStatus) {
     db.collection("menu").doc(itemId).update({ available: !currentStatus });
+};
+
+window.addItemToBasket = function(payloadString) {
+    const data = JSON.parse(payloadString);
+    const existing = userBasket.find(item => item.id === data.id);
+    
+    if (existing) {
+        existing.qty += 1;
+        if (data.sugar) existing.sugarQty += 1;
+    } else {
+        userBasket.push({
+            id: data.id, name: data.name, price: data.price, qty: 1,
+            hasSugarOption: data.sugar, sugarQty: data.sugar ? 1 : 0
+        });
+    }
+    renderBasketUI();
+};
+
+window.modifyBasketQty = function(itemId, amount) {
+    const target = userBasket.find(item => item.id === itemId);
+    if (!target) return;
+
+    target.qty += amount;
+    if (target.hasSugarOption) {
+        if (amount > 0) target.sugarQty += 1;
+        else target.sugarQty = Math.max(0, Math.min(target.qty, target.sugarQty - 1));
+    }
+
+    if (target.qty <= 0) userBasket = userBasket.filter(item => item.id !== itemId);
+    renderBasketUI();
+};
+
+window.modifySugarQty = function(itemId, amount) {
+    const target = userBasket.find(item => item.id === itemId);
+    if (!target || !target.hasSugarOption) return;
+
+    target.sugarQty = Math.max(0, Math.min(target.qty, target.sugarQty + amount));
+    renderBasketUI();
+};
+
+function renderBasketUI() {
+    const container = document.getElementById('basket-items-container');
+    const submitBtn = document.getElementById('submit-order-btn');
+    if (!container || !submitBtn) return;
+    container.innerHTML = "";
+
+    if (userBasket.length === 0) {
+        container.innerHTML = '<p style="color: #747d8c; font-style: italic;">Your basket is currently empty. Click "Add to Basket" above!</p>';
+        submitBtn.style.display = "none";
+        return;
+    }
+
+    submitBtn.style.display = "block";
+    userBasket.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'basket-item';
+        
+        let sugarControlsHtml = "";
+        if (item.hasSugarOption) {
+            const regularQty = item.qty - item.sugarQty;
+            sugarControlsHtml = `
+                <div style="margin-top: 4px; background: #f8f9fa; padding: 6px; border-radius: 6px; font-size: 0.85em;">
+                    <span>Sugar Cups: <strong>${item.sugarQty}</strong> | No Sugar: <strong>${regularQty}</strong></span>
+                    <div style="display:flex; gap:6px; margin-top:4px;">
+                        <button style="width:auto; padding:2px 8px; font-size:0.8em; margin:0; background:#2ed573;" onclick="modifySugarQty('${item.id}', 1)">+ Sugar</button>
+                        <button style="width:auto; padding:2px 8px; font-size:0.8em; margin:0; background:#747d8c;" onclick="modifySugarQty('${item.id}', -1)">- Sugar</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        div.innerHTML = `
+            <div style="flex: 1;"><strong>${item.name}</strong> (${item.price})${sugarControlsHtml}</div>
+            <div class="qty-controls">
+                <button class="qty-btn dec" onclick="modifyBasketQty('${item.id}', -1)">-</button>
+                <span style="font-weight:bold; min-width:20px; text-align:center;">${item.qty}</span>
+                <button class="qty-btn" onclick="modifyBasketQty('${item.id}', 1)">+</button>
+            </div>
+        `;
+        container.appendChild(div);
+    });
+}
+
+window.submitFinalBasket = function() {
+    if (userBasket.length === 0) return;
+
+    let submissionPromises = userBasket.map(item => {
+        let finalItemString = `${item.name} x${item.qty}`;
+        if (item.hasSugarOption) {
+            const regularQty = item.qty - item.sugarQty;
+            finalItemString = `${item.name} x${item.qty} (${item.sugarQty} With Sugar, ${regularQty} Without Sugar)`;
+        }
+        return db.collection("orders").add({
+            user: window.currentUserName, item: finalItemString, status: "Pending", timeEstimate: "", timestamp: Date.now()
+        });
+    });
+
+    Promise.all(submissionPromises).then(() => {
+        alert("Entire basket configuration sent to kitchen dashboard successfully!");
+        userBasket = [];
+        renderBasketUI();
+    });
 };
 
 window.logout = function() {
