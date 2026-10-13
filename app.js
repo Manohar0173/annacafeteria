@@ -1,5 +1,5 @@
 // ==========================================
-// 1. YOUR SECURE GOOGLE FIREBASE DATA KEYS
+// 1. FIREBASE SECURE CLOUD CONNECTION KEYS
 // ==========================================
 const firebaseConfig = {
   apiKey: "AIzaSyAKaiPq5tS3b3HLWbwaJtuuTeS2L5-YKOg",
@@ -13,66 +13,6 @@ const firebaseConfig = {
 // Wake up the database engine using our keys
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-
-// ==========================================
-// 2. MASTER INVENTORY REGISTRY (All 36 Items)
-// ==========================================
-const masterSnacksList = [
-    // --- ALWAYS AVAILABLE BEVERAGES ---
-    { id: 'lemon_tea', name: '🍋 Lemon Tea', price: '₹15', category: 'Beverages', requiresSugar: true },
-    { id: 'black_coffee', name: '☕ Black Coffee', price: '₹15', category: 'Beverages', requiresSugar: true },
-    { id: 'black_tea', name: '☕ Black Tea', price: '₹10', category: 'Beverages', requiresSugar: true },
-    { id: 'tea', name: '☕ Tea', price: '₹10', category: 'Beverages', requiresSugar: true },
-    { id: 'masala_chai', name: '☕ Masala Chai', price: '₹12', category: 'Beverages', requiresSugar: true },
-
-    // --- BREAKFAST ITEMS ---
-    { id: 'idli_sambar', name: '🍲 Idli Sambar', price: '₹30', category: 'Breakfast' },
-    { id: 'dal_vada', name: '🧆 Dal Vada', price: '₹25', category: 'Breakfast' },
-    { id: 'kanda_poha', name: '🥣 Kanda Poha', price: '₹20', category: 'Breakfast' },
-    { id: 'misal_pav', name: '🍲 Misal Pav', price: '₹40', category: 'Breakfast' },
-    { id: 'veg_upma', name: '🥣 Veg Upma', price: '₹20', category: 'Breakfast' },
-    { id: 'dhokla', name: '🫓 Dhokla', price: '₹25', category: 'Breakfast' },
-    { id: 'aloo_paratha', name: '🫓 Aloo Paratha', price: '₹35', category: 'Breakfast' },
-    { id: 'sevai_upma', name: '🥣 Sevai Upma', price: '₹20', category: 'Breakfast' },
-    { id: 'medu_vada_sambar', name: '🧆 Medu Vada Sambar', price: '₹35', category: 'Breakfast' },
-    { id: 'dal_pakvan', name: '🫓 Dal Pakvan', price: '₹40', category: 'Breakfast' },
-    { id: 'vada_usal_2pav', name: '🍲 Vada Usal 2 Pav', price: '₹45', category: 'Breakfast' },
-    { id: 'kanchipuram_idli', name: '🍲 Kanchipuram Idli Sambar', price: '₹35', category: 'Breakfast' },
-    { id: 'mini_masala_idli', name: '🍲 Mini Masala Idli', price: '₹30', category: 'Breakfast' },
-
-    // --- LUNCH THALI ITEMS ---
-    { id: 'chawli_masala', name: '🍛 Chawli Masala', price: '₹45', category: 'Lunch' },
-    { id: 'baigan_bharta', name: '🍆 Baigan Bharta', price: '₹45', category: 'Lunch' },
-    { id: 'dal_fry', name: '🍲 Dal Fry', price: '₹30', category: 'Lunch' },
-    { id: 'rice', name: '🍚 Rice', price: '₹20', category: 'Lunch' },
-    { id: 'chapaathi', name: '🫓 Chapaathi', price: '₹7', category: 'Lunch' },
-    { id: 'salad', name: '🥗 Salad', price: '₹15', category: 'Lunch' },
-    { id: 'papad', name: '🫓 Papad', price: '₹5', category: 'Lunch' },
-    { id: 'sweet_sev_kheer', name: '🍨 Sweet Sev Kheer', price: '₹30', category: 'Lunch' },
-    { id: 'dahi_bhendi_masala', name: '🍛 Dahi Bhendi Masala', price: '₹45', category: 'Lunch' },
-    { id: 'aloo_methi_dry', name: '🥔 Aloo Methi Dry', price: '₹40', category: 'Lunch' },
-    { id: 'sweet_sona_papadi', name: '🍨 Sweet Sona Papadi', price: '₹25', category: 'Lunch' },
-    { id: 'veg_kolapuri', name: '🌶️ Veg Kolapuri', price: '₹50', category: 'Lunch' },
-    { id: 'katol_dey', name: '🍛 Katol Dey', price: '₹45', category: 'Lunch' },
-    { id: 'sweet_gulab_jamun', name: '🍨 Sweet Gulab Jamun', price: '₹30', category: 'Lunch' },
-    { id: 'chole_masala', name: '🍛 Chole Masala', price: '₹50', category: 'Lunch' },
-    { id: 'doodi_channa_dry', name: '🥒 Doodi Channa Dry', price: '₹40', category: 'Lunch' },
-    { id: 'sweet_dahi', name: '🍨 Sweet Dahi', price: '₹20', category: 'Lunch' },
-    { id: 'soyabean_chilli', name: '🧆 Soyabean Chilli', price: '₹45', category: 'Lunch' },
-    { id: 'mix_veg_dry', name: '🥦 Mix Veg Dry', price: '₹45', category: 'Lunch' },
-    { id: 'sweet_jalebi', name: '🍨 Sweet Jalebi', price: '₹30', category: 'Lunch' },
-  
-    // --- EVENING SNACKS ---
-    { id: 'samosa', name: '🌯 Samosa', price: '₹15', category: 'Snacks' },
-    { id: 'bun_maska', name: '🍞 Bun Maska', price: '₹20', category: 'Snacks' },
-    { id: 'veg_toast_sandwich_maker', name: '🥪 Veg Toast Sandwich Maker', price: '₹35', category: 'Snacks' },
-    { id: 'veg_toast_sandwich', name: '🥪 Veg Toast Sandwich', price: '₹30', category: 'Snacks' },
-    { id: 'batata_vada_pav', name: '🍔 Batata Vada Pav', price: '₹20', category: 'Snacks' },
-    { id: 'dahi_kachori', name: '🥣 Dahi Kachori', price: '₹35', category: 'Snacks' },
-    { id: 'veg_cheese_toast', name: '🥪 Veg Cheese Toast Sandwich', price: '₹45', category: 'Snacks' },
-    { id: 'sev_puri', name: '🫓 Sev Puri', price: '₹30', category: 'Snacks' },
-    { id: 'jalebi_papadi', name: '🥨 Jalebi Papadi', price: '₹35', category: 'Snacks' }
-];
 
 let currentRole = null;
 window.currentUserName = "";
