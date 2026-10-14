@@ -28,12 +28,14 @@ window.checkLogin = function() {
     errorEl.innerText = "";
 
     if (userTyped === "AnnaOffice123") {
+        currentRole = 'user';
         document.getElementById("login-screen").style.display = "none";
         document.getElementById("user-screen").style.display = "block";
        window.currentUserName = prompt("Please enter your name:") || "Employee";
         
         // Triggers the real-time live menu feed for your employees
         listenToMenuUser();
+        listenToUserOrders();
     } 
     else if (userTyped === "admin") {
         currentRole = 'admin';
@@ -105,6 +107,53 @@ function listenToMenuChef() {
 // ==========================================
 // 4. REAL-TIME EMPLOYEE LIVE MENU FEED
 // ==========================================
+
+function listenToUserOrders() {
+    db.collection("orders").onSnapshot((snapshot) => {
+        const container = document.getElementById('user-orders');
+        if (!container) return;
+        container.innerHTML = "";
+        
+        let docs = [];
+        snapshot.forEach(doc => docs.push(doc.data()));
+        
+        // Sort so the latest order sits at the top of the worker's feed
+        docs.sort((a, b) => b.timestamp - a.timestamp);
+        
+        docs.forEach(order => {
+            // ONLY show the orders that match the logged-in employee's name
+            if(order.user === window.currentUserName) {
+                const div = document.createElement('div');
+                div.style.padding = "12px"; 
+                div.style.background = "white"; 
+                div.style.borderRadius = "8px"; 
+                div.style.marginBottom = "8px";
+                div.style.boxShadow = "0 2px 4px rgba(0,0,0,0.02)";
+                
+                // Set up status badge colors
+                let statusBg = "#ffeaa7"; // Yellow for Pending
+                let statusColor = "#d63031";
+                if(order.status === "Confirmed") { statusBg = "#81ecec"; statusColor = "#0984e3"; }
+                if(order.status === "Ready") { statusBg = "#55efc4"; statusColor = "#00b894"; }
+                
+                div.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <strong style="color:#2f3542;">${order.item}</strong> 
+                        <span style="padding: 4px 10px; border-radius: 20px; font-size: 0.8em; font-weight: bold; background: ${statusBg}; color: ${statusColor};">
+                            ${order.status}
+                        </span>
+                    </div>
+                    <p style="margin:6px 0 0 0; font-size:0.9em; color:#747d8c;">
+                        ${order.timeEstimate ? `⏱️ Ready in: <strong>\${order.timeEstimate}</strong>` : '⏳ Awaiting kitchen confirmation...'}
+                    </p>
+                `;
+                container.appendChild(div);
+            }
+        });
+    });
+}
+
+
 function listenToMenuUser() {
     db.collection("menu").where("available", "==", true).onSnapshot((snapshot) => {
         const container = document.getElementById('menu-container');
