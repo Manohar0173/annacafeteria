@@ -144,7 +144,7 @@ function listenToUserOrders() {
                         </span>
                     </div>
                     <p style="margin:6px 0 0 0; font-size:0.9em; color:#747d8c;">
-                        ${order.timeEstimate ? `⏱️ Ready in: <strong>\${order.timeEstimate}</strong>` : '⏳ Awaiting kitchen confirmation...'}
+                        ${order.timeEstimate ? `⏱️ Ready in: <strong>${order.timeEstimate}</strong>` : '⏳ Awaiting kitchen confirmation...'}
                     </p>
                 `;
                 container.appendChild(div);
