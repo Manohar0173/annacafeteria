@@ -35,6 +35,17 @@
                 <h2>👋 Office Snacks Menu</h2>
                 <button onclick="logout()" style="width: auto; background-color: #747d8c; margin-top:0;">Logout</button>
             </div>
+
+        <!-- 🍱 DYNAMIC THALI RESERVATION CARD SYSTEM -->
+            <div id="thali-reservation-card" style="background: linear-gradient(135deg, #ff6b81, #ff4757); color: white; padding: 18px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(255, 71, 87, 0.2);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <h3 style="margin: 0 0 6px 0; font-size: 1.3em;">🍱 Reserve Your Lunch Thali</h3>
+                        <p id="thali-ingredients-list" style="margin: 0; font-size: 0.95em; opacity: 0.95; font-style: italic;">Loading today's menu items...</p>
+                    </div>
+                    <div id="thali-action-area"></div>
+                </div>
+            </div>
             
         <!-- Dynamic Front-Desk Selection Menu Feed -->
             <div id="menu-container"></div>
