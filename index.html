@@ -84,14 +84,33 @@
             </div>
 
             <!-- 📥 ACTIVE ORDERS TICKETS AREA -->
-            <div style="background: white; border-radius: 8px; padding: 5px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 2px solid #f1f2f6; padding-bottom: 8px;">
-                    <h3 style="margin: 0; color: #2f3542; font-size: 1.2em;">📥 Live Incoming Tickets Queue</h3>
-                    <button onclick="clearAllOrders()" style="width: auto; background-color: #ff4757; margin: 0; font-size: 0.8em; padding: 6px 12px;">Clear History</button>
-                </div>
-                <div id="admin-orders"></div>
-            </div>
+<div style="background: white; border-radius: 8px; padding: 5px;">
+    
+    <!-- 🍱 DEDICATED CHEF THALI COUNTER & CONTROLLER CARD -->
+    <div style="background: linear-gradient(135deg, #2f3542, #57606f); color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 10px;">
+            <h3 style="margin: 0; font-size: 1.1em; display: flex; align-items: center; gap: 8px;">🍱 Lunch Thali Tracker</h3>
+            <button id="chef-thali-toggle-btn" onclick="toggleThaliMasterInventory()" style="width: auto; margin: 0; padding: 4px 10px; font-size: 0.8em; font-weight: bold; border: none; border-radius: 4px; cursor: pointer; background: #2ed573; color: white;">🟢 Booking Open</button>
         </div>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 1.1em; font-weight: 500;">Total Thalis Reserved Today:</span>
+            <span id="chef-thali-count" style="font-size: 1.8em; font-weight: bold; color: #ff4757; background: white; padding: 2px 14px; border-radius: 6px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);">0</span>
+        </div>
+        <button onclick="toggleChefThaliList()" style="width: 100%; margin: 10px 0 0 0; padding: 6px; background: rgba(255,255,255,0.1); border: none; border-radius: 4px; color: white; font-size: 0.85em; font-weight: bold; cursor: pointer; text-align: center;">
+            <span id="thali-list-arrow">▼ View Employee Booking Details</span>
+        </button>
+        <div id="chef-thali-list-wrapper" style="display: none; margin-top: 10px; background: white; color: #2f3542; padding: 10px; border-radius: 6px; max-height: 200px; overflow-y: auto;">
+            <div id="chef-thali-individual-bookings"></div>
+        </div>
+    </div>
+
+    <!-- 🍟 LIVE INCOMING SNACKS QUEUE (Separated from Thalis) -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 2px solid #f1f2f6; padding-bottom: 8px;">
+        <h3 style="margin: 0; color: #2f3542; font-size: 1.2em;">📥 Live Incoming Tickets Queue</h3>
+        <button onclick="clearAllOrders()" style="width: auto; background-color: #ff4757; margin: 0; font-size: 0.8em; padding: 6px 12px;">Clear History</button>
+    </div>
+    <div id="admin-orders"></div>
+</div>
 
     <!-- Connect to our logic brain file -->
     <script src="app.js"></script>
