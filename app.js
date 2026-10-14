@@ -143,8 +143,10 @@ function listenToUserOrders() {
                             ${order.status}
                         </span>
                     </div>
-                    <p style="margin:6px 0 0 0; font-size:0.9em; color:#747d8c;">
-                        ${order.timeEstimate ? `⏱️ Ready in: <strong>${order.timeEstimate}</strong>` : '⏳ Awaiting kitchen confirmation...'}
+                     <p style="margin:6px 0 0 0; font-size:0.9em; color:#747d8c;">
+                        \${order.status === "Pending" ? '⏳ Awaiting kitchen confirmation...' : ''}
+                        \${order.status === "Confirmed" && order.timeEstimate ? `⏱️ Ready in: <strong>${order.timeEstimate}</strong>` : ''}
+                        \${order.status === "Ready" ? '✅ Your food is ready! Please collect it.' : ''}
                     </p>
                 `;
                 container.appendChild(div);
@@ -367,8 +369,10 @@ function listenToOrdersKitchen() {
 // Global scope definition connecting the chef dashboard button clicks directly to Firebase
 window.modifyTicketStatus = function(ticketId, targetStatus) {
     let eta = "";
-    if (targetStatus === 'Confirmed') {
-        eta = prompt("Enter preparation time estimate (e.g., 10 mins):") || "10 mins";
+     if (targetStatus === 'Confirmed') {
+        let userInput = prompt("Enter preparation time (number only, e.g., 10):") || "10";
+        let numberOnly = userInput.replace(/[^0-9]/g, '');
+        eta = numberOnly ? `${numberOnly} mins` : "10 mins";
     }
     db.collection("orders").doc(ticketId).update({ status: targetStatus, timeEstimate: eta });
 };
