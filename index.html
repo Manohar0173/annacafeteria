@@ -53,26 +53,34 @@
             <div id="user-orders"></div>
         </div>
 
-        <!-- THE KITCHEN DASHBOARD ROOM (Upgraded) -->
-        <div id="admin-screen" style="display: none;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h2>👨‍🍳 Kitchen Dashboard Control</h2>
-                <button onclick="logout()" style="width: auto; background-color: #747d8c; margin-top:0;">Logout</button>
+          <!-- 3. THE OPTIMIZED KITCHEN DASHBOARD ROOM -->
+        <div id="admin-screen" style="display: none; max-width: 800px; margin: 0 auto; padding: 15px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; background: #2f3542; color: white; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px;">
+                <h2 style="margin: 0; font-size: 1.3em;">👨‍🍳 Kitchen Control</h2>
+                <button onclick="logout()" style="width: auto; background-color: #747d8c; margin: 0; padding: 6px 12px; font-size: 0.9em;">Logout</button>
             </div>
-            <div class="card" style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                <h3>📢 Today's Menu Control</h3>
-                <p>Toggle items to show/hide them on the employee menu:</p>
-                <!-- This container will hold the chef's active item toggle switches -->
-                <div id="chef-menu-toggle-container"></div>
+
+            <!-- 🛠️ COLLAPSIBLE DAILY MENU UTILITY -->
+            <div style="background: #f1f2f6; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ced6e0; overflow: hidden;">
+                <button onclick="toggleChefMenuPanel()" style="width: 100%; text-align: left; padding: 12px 16px; background: #dfe4ea; border: none; font-size: 1em; font-weight: bold; color: #2f3542; cursor: pointer; display: flex; justify-content: space-between; align-items: center; margin: 0;">
+                    <span>📢 Daily Menu Availability Setup</span>
+                    <span id="menu-panel-arrow">▼ Expand Controls</span>
+                </button>
+                <div id="chef-menu-collapsible-wrapper" style="display: none; padding: 15px; background: white; max-height: 400px; overflow-y: auto;">
+                    <p style="margin-top: 0; color: #747d8c; font-size: 0.9em;">Toggle items to show/hide them on the employee menu for today:</p>
+                    <div id="chef-menu-toggle-container"></div>
+                </div>
             </div>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h3>📥 Active Incoming Orders</h3>
-                <button onclick="clearAllOrders()" style="width: auto; background-color: #ff4757; margin-top:0; font-size: 0.8em; padding: 6px 12px;">Clear Order History</button>
+
+            <!-- 📥 ACTIVE ORDERS TICKETS AREA -->
+            <div style="background: white; border-radius: 8px; padding: 5px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 2px solid #f1f2f6; padding-bottom: 8px;">
+                    <h3 style="margin: 0; color: #2f3542; font-size: 1.2em;">📥 Live Incoming Tickets Queue</h3>
+                    <button onclick="clearAllOrders()" style="width: auto; background-color: #ff4757; margin: 0; font-size: 0.8em; padding: 6px 12px;">Clear History</button>
+                </div>
+                <div id="admin-orders"></div>
             </div>
-            <!-- This container will show the chef real-time incoming orders -->
-            <div id="admin-orders"></div>
         </div>
-    </div>
 
     <!-- Connect to our logic brain file -->
     <script src="app.js"></script>
