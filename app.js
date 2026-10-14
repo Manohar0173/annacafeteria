@@ -503,3 +503,66 @@ window.cancelThaliReservation = function(documentId) {
         });
     }
 };
+
+
+// Collapses and expands the individual employee Thali lists cleanly
+window.toggleChefThaliList = function() {
+    const wrapper = document.getElementById('chef-thali-list-wrapper');
+    const arrow = document.getElementById('thali-list-arrow');
+    if (!wrapper || !arrow) return;
+
+    if (wrapper.style.display === 'none') {
+        wrapper.style.display = 'block';
+        arrow.innerText = '▲ Hide Booking Details';
+    } else {
+        wrapper.style.display = 'none';
+        arrow.innerText = '▼ View Employee Booking Details';
+    }
+};
+
+// Chef's Master Switch logic tracking Thali stock availability inside a shared document state row
+window.toggleThaliMasterInventory = function() {
+    const btn = document.getElementById('chef-thali-toggle-btn');
+    if (!btn) return;
+    
+    const isCurrentlyOpen = btn.innerText.includes("🟢");
+    const targetStatus = !isCurrentlyOpen;
+
+    db.collection("settings").doc("thali_status").set({ open: targetStatus }).then(() => {
+        alert(targetStatus ? "Thali bookings are now OPEN for all office workers!" : "Thali marked OUT OF STOCK! Bookings frozen.");
+    });
+};
+
+// Monitor the master toggle settings state and instantly swap the user button matching stock rules
+function listenToThaliInventoryState() {
+    db.collection("settings").doc("thali_status").onSnapshot((doc) => {
+        const chefBtn = document.getElementById('chef-thali-toggle-btn');
+        const userCard = document.getElementById('thali-reservation-card');
+        const userActionArea = document.getElementById('thali-action-area');
+        
+        let isOpen = true; // Fallback default state
+        if (doc.exists) { isOpen = doc.data().open; }
+
+        // Update Chef Control Panel Switch indicator styling
+        if (chefBtn) {
+            chefBtn.innerText = isOpen ? "🟢 Booking Open" : "🔴 Out of Stock";
+            chefBtn.style.background = isOpen ? "#2ed573" : "#ff4757";
+        }
+
+        // Handle customer panel availability freezes dynamically
+        if (!isOpen && userCard && userActionArea) {
+            const hasCancel = userActionArea.innerHTML.includes("Cancel");
+            if (!hasCancel) {
+                userActionArea.innerHTML = `<span style="background:#2f3542; color:#a4b0be; padding:8px 12px; font-weight:bold; font-size:0.85em; border-radius:6px; display:inline-block;">🚫 Finished</span>`;
+                const desc = document.getElementById('thali-ingredients-list');
+                if(desc) desc.innerText = "Lunch Thali is officially SOLD OUT for today.";
+            }
+        }
+    });
+}
+
+// Connect the stock checker engine to sync immediately upon launching pages
+db.collection("settings").doc("thali_status").get().then((doc) => {
+    if (!doc.exists) db.collection("settings").doc("thali_status").set({ open: true });
+});
+listenToThaliInventoryState();
