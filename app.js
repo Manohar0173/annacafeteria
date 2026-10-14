@@ -408,3 +408,17 @@ function formatOrderClockTime(timestamp) {
     hours = hours ? hours : 12;
     return hours + ":" + minutes + " " + ampm;
 }
+
+window.toggleChefMenuPanel = function() {
+    const wrapper = document.getElementById('chef-menu-collapsible-wrapper');
+    const arrow = document.getElementById('menu-panel-arrow');
+    if (!wrapper || !arrow) return;
+
+    if (wrapper.style.display === 'none') {
+        wrapper.style.display = 'block';
+        arrow.innerText = '▲ Collapse Controls';
+    } else {
+        wrapper.style.display = 'none';
+        arrow.innerText = '▼ Expand Controls';
+    }
+};
