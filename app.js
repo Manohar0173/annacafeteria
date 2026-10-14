@@ -348,39 +348,57 @@ window.submitFinalBasket = function() {
 function listenToOrdersKitchen() {
     db.collection("orders").onSnapshot((snapshot) => {
         const container = document.getElementById('admin-orders');
+        const thaliCountEl = document.getElementById('chef-thali-count');
+        const thaliBookingsEl = document.getElementById('chef-thali-individual-bookings');
         if (!container) return;
         container.innerHTML = "";
-        let activeOrders = [];
-        snapshot.forEach(doc => activeOrders.push({ id: doc.id, ...doc.data() }));
-        activeOrders.sort((a, b) => b.timestamp - a.timestamp);
         
+        let activeOrders = [];
+        let totalThalisCount = 0;
+        let thaliBookingsHtml = "";
+
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            // 🍱 Filters Thali records to display them inside their dedicated panel card tracker container
+            if (data.item === "🍱 Special Lunch Thali Reservation") {
+                totalThalisCount++;
+                thaliBookingsHtml += `
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px dashed #eee; font-size:0.9em;">
+                        <strong>${data.user}</strong>
+                        <span style="color:#747d8c; font-size:0.85em;">⏰ ${typeof formatOrderClockTime === 'function' ? formatOrderClockTime(data.timestamp) : ''}</span>
+                    </div>
+                `;
+            } else {
+                activeOrders.push({ id: doc.id, ...data });
+            }
+        });
+
+        // 📊 Dynamically update the Thali Panel Tracker counters
+        if (thaliCountEl) thaliCountEl.innerText = totalThalisCount;
+        if (thaliBookingsEl) {
+            thaliBookingsEl.innerHTML = thaliBookingsHtml || '<p style="color:#747d8c; margin:0; font-size:0.9em; font-style:italic;">No Thali reservations placed yet.</p>';
+        }
+
+        // Sort and render short-order snack cards normally
+        activeOrders.sort((a, b) => b.timestamp - a.timestamp);
         activeOrders.forEach(order => {
             if (order.status !== "Ready") {
                 const div = document.createElement('div');
-                div.style.padding = "12px"; 
-                div.style.borderRadius = "8px"; 
-                div.style.marginBottom = "8px";
-                div.style.boxShadow = "0 2px 4px rgba(0,0,0,0.02)";
+                div.style.padding = "12px"; div.style.borderRadius = "8px"; div.style.marginBottom = "8px"; div.style.boxShadow = "0 2px 4px rgba(0,0,0,0.02)";
                 
-                // 🔵 DYNAMIC CHEF TICKET STYLING
-                let cardBg = "white";
-                let statusLabelHtml = "";
-                let showConfirmButton = true;
+                let cardBg = "white"; let statusLabelHtml = ""; let showConfirmButton = true;
                 
                 if (order.status === "Confirmed") {
-                    cardBg = "#e3f2fd"; // Soft blue background for processed tickets
-                    showConfirmButton = false; // Hide Confirm button since it's already done
+                    cardBg = "#e3f2fd"; showConfirmButton = false;
                     statusLabelHtml = ` <span style="float:right; padding:2px 8px; border-radius:10px; font-size:0.8em; font-weight:bold; background:#81ecec; color:#0984e3;">⏱️ ETA: ${order.timeEstimate || '10 mins'}</span>`;
                 }
                 
                 div.style.background = cardBg;
-                
-                // Build the button elements dynamically based on the state
                 let confirmBtnHtml = showConfirmButton ? `<button style="width:auto; padding:6px 12px; margin:0; background:#0984e3; color:white; border:none; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="modifyTicketStatus('${order.id}', 'Confirmed')">Confirm</button>` : '';
                 
                 div.innerHTML = `
-                    <p style="margin:0 0 8px 0; color:#2f3542;">
-                        <span style="color:#747d8c; font-size:0.85em; font-weight:bold; display:block; margin-bottom:4px;">📥 Incoming: ${formatOrderClockTime(order.timestamp)}</span>
+                    <p style="margin:0 0 8px 0; color:#2f3542; font-size: 0.95em;">
+                        <span style="color:#747d8c; font-size:0.85em; font-weight:bold; display:block; margin-bottom:4px;">📥 Incoming: ${typeof formatOrderClockTime === 'function' ? formatOrderClockTime(order.timestamp) : ''}</span>
                         <strong>${order.user}</strong> ordered <strong style="color:#ff4757;">${order.item}</strong>
                         ${statusLabelHtml}
                     </p>
