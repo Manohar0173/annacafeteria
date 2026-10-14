@@ -105,43 +105,41 @@ function listenToMenuChef() {
 // ==========================================
 // 4. REAL-TIME EMPLOYEE LIVE MENU FEED
 // ==========================================
-function listenToUserOrders() {
-    db.collection("orders").onSnapshot((snapshot) => {
-        const container = document.getElementById('user-orders');
+function listenToMenuUser() {
+    db.collection("menu").where("available", "==", true).onSnapshot((snapshot) => {
+        const container = document.getElementById('menu-container');
         if (!container) return;
-        container.innerHTML = "";
-        let docs = [];
-        snapshot.forEach(doc => docs.push(doc.data()));
-        docs.sort((a,b) => b.timestamp - a.timestamp);
+        container.innerHTML = "<h3>Today's Available Menu</h3>";
         
-        docs.forEach(order => {
-            if(order.user === window.currentUserName) {
-                const div = document.createElement('div');
-                div.style.padding = "12px"; 
-                div.style.background = "white"; 
-                div.style.borderRadius = "8px"; 
-                div.style.marginBottom = "8px";
-                div.style.boxShadow = "0 2px 4px rgba(0,0,0,0.02)";
-                
-                // Dynamic inline background color assignment matching the chef triggers exactly
-                let statusBg = "#ffeaa7"; // Default yellow for Pending
-                let statusColor = "#d63031";
-                if(order.status === "Confirmed") { statusBg = "#81ecec"; statusColor = "#0984e3"; }
-                if(order.status === "Ready") { statusBg = "#55efc4"; statusColor = "#00b894"; }
-                
-                div.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <strong style="color:#2f3542;">${order.item}</strong> 
-                        <span style="padding: 4px 10px; border-radius: 20px; font-size: 0.8em; font-weight: bold; background: ${statusBg}; color: ${statusColor};">
-                            ${order.status}
-                        </span>
-                    </div>
-                    <p style="margin:6px 0 0 0; font-size:0.9em; color:#747d8c;">
-                        ${order.timeEstimate ? `⏱️ Ready in: <strong>\${order.timeEstimate}</strong>` : '⏳ Awaiting kitchen confirmation...'}
-                    </p>
-                `;
-                container.appendChild(div);
-            }
+        if (snapshot.empty) {
+            container.innerHTML += "<p style='color:#747d8c;'>The kitchen hasn't opened ordering for any items yet.</p>";
+            return;
+        }
+
+        snapshot.forEach(doc => {
+            const item = doc.data();
+            const div = document.createElement('div');
+            div.style.display = "flex"; 
+            div.style.justifyContent = "space-between";
+            div.style.alignItems = "center"; 
+            div.style.padding = "12px";
+            div.style.backgroundColor = "white"; 
+            div.style.borderRadius = "8px";
+            div.style.marginBottom = "8px"; 
+            div.style.boxShadow = "0 2px 4px rgba(0,0,0,0.02)";
+
+            // Packages data payload safely into a text string string mapping system
+            const payload = JSON.stringify({ id: doc.id, name: item.name, price: item.price, sugar: item.requiresSugarOption || false }).replace(/"/g, '&quot;');
+
+            // 🟢 FIXED: Button trigger explicitly mapped to addItemToBasket instead of processUserSelection
+            div.innerHTML = `
+                <div>
+                    <strong>${item.name}</strong> - <span style="color:#ff4757; font-weight:bold;">${item.price}</span>
+                    <br><small style="color:#747d8c;">Category: ${item.category}</small>
+                </div>
+                <button style="width:auto; margin:0; padding:8px 16px; font-size:0.9em;" onclick="addItemToBasket('${payload}')">Add to Basket</button>
+            `;
+            container.appendChild(div);
         });
     });
 }
