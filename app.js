@@ -434,3 +434,54 @@ window.toggleChefMenuPanel = function() {
         arrow.innerText = '▼ Expand Controls';
     }
 };
+
+// Verification engine looking into the database to see if this specific user reserved a Thali today
+function checkThaliReservationState() {
+    db.collection("orders")
+      .where("user", "==", window.currentUserName)
+      .where("item", "==", "🍱 Special Lunch Thali Reservation")
+      .onSnapshot((snapshot) => {
+          const actionArea = document.getElementById('thali-action-area');
+          if (!actionArea) return;
+
+          if (!snapshot.empty) {
+              // 🟢 FIXED SYNTAX: Extracts the correct unique document ID mapping token row
+              const activeDoc = snapshot.docs[0];
+              const activeDocId = activeDoc.id;
+              
+              actionArea.innerHTML = `
+                  <button onclick="cancelThaliReservation('${activeDocId}')" style="background:#2f3542; color:#ff4757; border:2px solid #ff4757; width:auto; margin:0; padding:8px 14px; font-weight:bold; cursor:pointer; border-radius:6px;">
+                      ❌ Cancel Reservation
+                  </button>
+              `;
+          } else {
+              actionArea.innerHTML = `
+                  <button onclick="submitThaliReservation()" style="background:white; color:#ff4757; width:auto; margin:0; padding:8px 16px; font-weight:bold; border:none; border-radius:6px; cursor:pointer; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
+                      Reserve Thali
+                  </button>
+              `;
+          }
+      });
+}
+
+// Submits the reservation token cleanly to the kitchen dashboard queue lines
+window.submitThaliReservation = function() {
+    db.collection("orders").add({
+        user: window.currentUserName,
+        item: "🍱 Special Lunch Thali Reservation",
+        status: "Pending",
+        timeEstimate: "",
+        timestamp: Date.now()
+    }).then(() => {
+        alert("Your Lunch Thali has been successfully reserved!");
+    });
+};
+
+// Reversible option wiping the cancellation ticket document directly from the cloud logs
+window.cancelThaliReservation = function(documentId) {
+    if (confirm("Do you want to cancel your Thali reservation?")) {
+        db.collection("orders").doc(documentId).delete().then(() => {
+            alert("Your reservation has been cancelled successfully.");
+        });
+    }
+};
