@@ -138,7 +138,10 @@ function listenToUserOrders() {
                 
                 div.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <strong style="color:#2f3542;">${order.item}</strong> 
+                    <div style="flex-grow:1;">
+                        <strong style="color:#2f3542; display:block;">${order.item}</strong>
+                        <small style="color:#747d8c; font-weight:500;">Sent at: ${formatOrderClockTime(order.timestamp)}</small>
+                    </div> 
                         <span style="padding: 4px 10px; border-radius: 20px; font-size: 0.8em; font-weight: bold; background: ${statusBg}; color: ${statusColor};">
                             ${order.status}
                         </span>
@@ -365,6 +368,7 @@ function listenToOrdersKitchen() {
                 
                 div.innerHTML = `
                     <p style="margin:0 0 8px 0; color:#2f3542;">
+                        <span style="color:#747d8c; font-size:0.85em; font-weight:bold; display:block; margin-bottom:4px;">📥 Incoming: ${formatOrderClockTime(order.timestamp)}</span>
                         <strong>${order.user}</strong> ordered <strong style="color:#ff4757;">${order.item}</strong>
                         ${statusLabelHtml}
                     </p>
@@ -392,4 +396,15 @@ window.modifyTicketStatus = function(ticketId, targetStatus) {
 
 window.logout = function() {
     window.location.reload();
+}
+  
+function formatOrderClockTime(timestamp) {
+    if (!timestamp) return "";
+    const date = new Date(timestamp);
+    let hours = date.getHours();
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    return hours + ":" + minutes + " " + ampm;
 }
