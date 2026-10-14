@@ -162,39 +162,51 @@ function listenToUserOrders() {
 function listenToMenuUser() {
     db.collection("menu").where("available", "==", true).onSnapshot((snapshot) => {
         const container = document.getElementById('menu-container');
+        const thaliIngredientsText = document.getElementById('thali-ingredients-list');
         if (!container) return;
-        container.innerHTML = "<h3>Today's Available Menu</h3>";
         
-        if (snapshot.empty) {
-            container.innerHTML += "<p style='color:#747d8c;'>The kitchen hasn't opened ordering for any items yet.</p>";
-            return;
-        }
+        container.innerHTML = "<h3>Today's Available Snacks & Beverages</h3>";
+        
+        let lunchIngredientsArray = [];
 
         snapshot.forEach(doc => {
             const item = doc.data();
-            const div = document.createElement('div');
-            div.style.display = "flex"; 
-            div.style.justifyContent = "space-between";
-            div.style.alignItems = "center"; 
-            div.style.padding = "12px";
-            div.style.backgroundColor = "white"; 
-            div.style.borderRadius = "8px";
-            div.style.marginBottom = "8px"; 
-            div.style.boxShadow = "0 2px 4px rgba(0,0,0,0.02)";
+            
+            // If the item belongs to lunch, collect its name for the Thali banner summary text
+            if (item.category === 'Lunch') {
+                lunchIngredientsArray.push(item.name);
+            } else {
+                // Render standard snacks and beverage counters normally
+                const div = document.createElement('div');
+                div.style.display = "flex"; div.style.justifyContent = "space-between";
+                div.style.alignItems = "center"; div.style.padding = "12px";
+                div.style.backgroundColor = "white"; div.style.borderRadius = "8px";
+                div.style.marginBottom = "8px"; div.style.boxShadow = "0 2px 4px rgba(0,0,0,0.02)";
 
-            // Packages data payload safely into a text string string mapping system
-            const payload = JSON.stringify({ id: doc.id, name: item.name, price: item.price, sugar: item.requiresSugarOption || false }).replace(/"/g, '&quot;');
+                const payload = JSON.stringify({ id: doc.id, name: item.name, price: item.price, sugar: item.requiresSugarOption || false }).replace(/"/g, '&quot;');
 
-            // 🟢 FIXED: Button trigger explicitly mapped to addItemToBasket instead of processUserSelection
-            div.innerHTML = `
-                <div>
-                    <strong>${item.name}</strong> - <span style="color:#ff4757; font-weight:bold;">${item.price}</span>
-                    <br><small style="color:#747d8c;">Category: ${item.category}</small>
-                </div>
-                <button style="width:auto; margin:0; padding:8px 16px; font-size:0.9em;" onclick="addItemToBasket('${payload}')">Add to Basket</button>
-            `;
-            container.appendChild(div);
+                div.innerHTML = `
+                    <div>
+                        <strong>${item.name}</strong> - <span style="color:#ff4757; font-weight:bold;">${item.price}</span>
+                        <br><small style="color:#747d8c;">Category: ${item.category}</small>
+                    </div>
+                    <button style="width:auto; margin:0; padding:8px 16px; font-size:0.9em;" onclick="addItemToBasket('${payload}')">Add to Basket</button>
+                `;
+                container.appendChild(div);
+            }
         });
+
+        // Combine the array items cleanly to write out the dynamic description text string
+        if (thaliIngredientsText) {
+            thaliIngredientsText.innerText = lunchIngredientsArray.length > 0 
+                ? "Today's Thali Contains: " + lunchIngredientsArray.join(", ") 
+                : "The kitchen hasn't updated today's Thali items yet.";
+        }
+        
+        // This links up the upcoming reservation toggle state checks
+        if (typeof checkThaliReservationState === 'function') {
+            checkThaliReservationState();
+        }
     });
 }
 
