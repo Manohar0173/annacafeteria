@@ -144,9 +144,9 @@ function listenToUserOrders() {
                         </span>
                     </div>
                      <p style="margin:6px 0 0 0; font-size:0.9em; color:#747d8c;">
-                        \${order.status === "Pending" ? '⏳ Awaiting kitchen confirmation...' : ''}
-                        \${order.status === "Confirmed" && order.timeEstimate ? `⏱️ Ready in: <strong>${order.timeEstimate}</strong>` : ''}
-                        \${order.status === "Ready" ? '✅ Your food is ready! Please collect it.' : ''}
+                        ${order.status === "Pending" ? '⏳ Awaiting kitchen confirmation...' : ''}
+                        ${order.status === "Confirmed" && order.timeEstimate ? `⏱️ Ready in: <strong>${order.timeEstimate}</strong>` : ''}
+                        ${order.status === "Ready" ? '✅ Your food is ready! Please collect it.' : ''}
                     </p>
                 `;
                 container.appendChild(div);
