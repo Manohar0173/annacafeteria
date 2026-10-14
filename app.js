@@ -372,7 +372,7 @@ window.modifyTicketStatus = function(ticketId, targetStatus) {
      if (targetStatus === 'Confirmed') {
         let userInput = prompt("Enter preparation time (number only, e.g., 10):") || "10";
         let numberOnly = userInput.replace(/[^0-9]/g, '');
-        eta = numberOnly ? `${numberOnly} mins` : "10 mins";
+        eta = numberOnly ? numberOnly + " mins" : "10 mins";
     }
     db.collection("orders").doc(ticketId).update({ status: targetStatus, timeEstimate: eta });
 };
