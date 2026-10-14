@@ -331,33 +331,46 @@ window.submitFinalBasket = function() {
 // 5. LIVE KITCHEN ORDER TICKETS ENGINE
 // ==========================================
 function listenToOrdersKitchen() {
-    // Listens to the cloud orders folder and updates the chef screen instantly when a worker checks out
     db.collection("orders").onSnapshot((snapshot) => {
         const container = document.getElementById('admin-orders');
         if (!container) return;
-        container.innerHTML = ""; // Clear old cards to prevent duplicate loop loading
-        
-        let activeOrders = []; // Clean initialized empty array syntax
+        container.innerHTML = "";
+        let activeOrders = [];
         snapshot.forEach(doc => activeOrders.push({ id: doc.id, ...doc.data() }));
-        
-        // Sort orders so the newest incoming tickets flash at the top of the chef screen
         activeOrders.sort((a, b) => b.timestamp - a.timestamp);
         
         activeOrders.forEach(order => {
-            // Only show orders that are actively being worked on (Hide them once they are fully "Ready")
             if (order.status !== "Ready") {
                 const div = document.createElement('div');
                 div.style.padding = "12px"; 
-                div.style.background = "white"; 
                 div.style.borderRadius = "8px"; 
                 div.style.marginBottom = "8px";
                 div.style.boxShadow = "0 2px 4px rgba(0,0,0,0.02)";
                 
+                // 🔵 DYNAMIC CHEF TICKET STYLING
+                let cardBg = "white";
+                let statusLabelHtml = "";
+                let showConfirmButton = true;
+                
+                if (order.status === "Confirmed") {
+                    cardBg = "#e3f2fd"; // Soft blue background for processed tickets
+                    showConfirmButton = false; // Hide Confirm button since it's already done
+                    statusLabelHtml = ` <span style="float:right; padding:2px 8px; border-radius:10px; font-size:0.8em; font-weight:bold; background:#81ecec; color:#0984e3;">⏱️ ETA: ${order.timeEstimate || '10 mins'}</span>`;
+                }
+                
+                div.style.background = cardBg;
+                
+                // Build the button elements dynamically based on the state
+                let confirmBtnHtml = showConfirmButton ? `<button style="width:auto; padding:6px 12px; margin:0; background:#0984e3; color:white; border:none; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="modifyTicketStatus('${order.id}', 'Confirmed')">Confirm</button>` : '';
+                
                 div.innerHTML = `
-                    <p style="margin:0 0 8px 0;"><strong>${order.user}</strong> ordered <strong style="color:#ff4757;">${order.item}</strong></p>
+                    <p style="margin:0 0 8px 0; color:#2f3542;">
+                        <strong>${order.user}</strong> ordered <strong style="color:#ff4757;">${order.item}</strong>
+                        ${statusLabelHtml}
+                    </p>
                     <div style="display:flex; gap:8px;">
-                        <button style="width:auto; padding:6px 12px; margin:0; background:#0984e3;" onclick="modifyTicketStatus('${order.id}', 'Confirmed')">Confirm</button>
-                        <button style="width:auto; padding:6px 12px; margin:0; background:#2ed573;" onclick="modifyTicketStatus('${order.id}', 'Ready')">Mark Ready</button>
+                        ${confirmBtnHtml}
+                        <button style="width:auto; padding:6px 12px; margin:0; background:#2ed573; color:white; border:none; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="modifyTicketStatus('${order.id}', 'Ready')">Mark Ready</button>
                     </div>
                 `;
                 container.appendChild(div);
